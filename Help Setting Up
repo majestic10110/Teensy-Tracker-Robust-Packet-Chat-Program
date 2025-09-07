@@ -1,0 +1,65 @@
+How to Run Teensy Tracker Chat on Windows
+1. Install Python
+
+Go to https://www.python.org/downloads/windows/
+
+Download Python 3.10 or newer (64-bit).
+
+During installation:
+
+✅ Tick “Add Python to PATH” (important).
+
+Then click Install Now.
+
+2. Install Dependencies
+
+Open the Command Prompt (press ⊞ Win → type cmd → press Enter).
+
+Type this command and press Enter:
+
+pip install pyqt5 pyserial
+
+
+This will install the graphical toolkit (PyQt5) and serial communication library (pyserial).
+
+3. Get the Program
+
+Put the file Teensy_Tracker_Chat_v0958.py into a folder (e.g. C:\TeensyTracker).
+
+You can download and move it there.
+
+4. Run the Program
+
+Open Command Prompt again.
+
+Change to the folder where the file is saved. Example:
+
+cd C:\TeensyTracker
+
+
+Start the program by typing:
+
+python Teensy_Tracker_Chat_v0958.py
+
+5. Using the Program
+
+The window will open with:
+
+Serial settings at the top (choose your COM port and baud rate, then click Connect).
+
+Chat tab with send/receive windows and a red SEND button.
+
+Send GPS button (top-right) to send your current GPS coordinates.
+
+Grid Map tab to see positions plotted.
+
+⚠️ Tips for beginners (You can always use www.Grok.com or www.ChatGPT.com to help with any issues you have getting started.)
+
+If you get an error like “python not found”, restart your computer (PATH change takes effect).
+
+If that doesn’t work, run py instead of python. Example:
+
+py Teensy_Tracker_Chat_v0958.py
+
+
+Make sure your Teensy or TNC device is plugged in and shows up in Windows Device Manager as a COM port.
