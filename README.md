@@ -1,5 +1,7 @@
 # Teensy Tracker Chat
 
+*** If you are able to test v097 (simple chat) and the Alpha mapping v0958 (GPS and Grid mapping) and report any issues or bugs please do so. Thank you M0OLI
+
 A desktop chat application (PyQt5 + pyserial) for person-to-person communication over ham bands using a Teensy Tracker TNC device.
 
 ## Features
