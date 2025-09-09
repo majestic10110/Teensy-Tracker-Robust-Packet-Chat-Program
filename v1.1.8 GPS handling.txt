@@ -1,0 +1,24 @@
+There is an issue trying to obtain GPS info from the device and it is hoped that In future a future firmware update will allow us to grab an echo of GPS info. In the mean time workarounds are being sought:
+
+Attempt 1: [FAILED] : As the Teensy Tracker doesn't echo GPS in firmware the route to display data is ;
+
+Press SEND GPS button
+
+ESC %A1 #Turns of APRS
+ESC %AI #Queries GPS string
+Parses #Program parses out the GPS position part
+ESC %A0 #Turns off APRS to prevent APRS beacons in the chat program
+ESC %ZS #Saves the APRS off condition
+
+Attempt 2: 
+
+trying the above but instead of attempting a parse, attempting to have aprs position string appear in the send field.
+
+When pressing GPS SEND 
+1. A pre check of all APRS conditions required for obtaining APRS position string e.g GPS fix, I to confirm global Mycall,
+
+%AM to read APRS-Mycall, %A to show mode, %AV to read validity window, %AI to show GPS status/age,
+
+2. When pre-requisites are true, then we may get string output and work from there
+
+Success! 
