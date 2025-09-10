@@ -1,7 +1,7 @@
 # Teensy Tracker Chat
 **** WARNING **** DISCONNECT DATA CABLE TO RADIO WHEN CHANGING KISS CONDITION AS IT WILL PTT. There is no issue after KISS condition is off, chat is available.
 
-*** If you are able to test v1.1.9(with GPS and beaconing) Beta, Requires FONT file in same folder as program the font file is VT323-Regular.ttf or the Zip file VT323, Thank you M0OLI
+*** If you are able to test v1.1.9(with GPS and beaconing) Beta, Requires VT323-regular.ttf file in same folder ,Thank you M0OLI
 
 A desktop chat application (PyQt5 + pyserial) for person-to-person communication over ham bands using a Teensy Tracker TNC device.
 
