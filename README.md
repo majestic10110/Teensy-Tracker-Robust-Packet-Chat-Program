@@ -4,6 +4,8 @@
 *** If you are able to test v1.1.9(with GPS and beaconing) Beta, Requires VT323-regular.ttf file in same folder ,Thank you M0OLI
 ** IMPORTANT: If using the Artificial Intelligence version starting 1.2.0 (Edit with notepad and ctrl+F enter System to search for the system field and edit with your callsign as the responsible callsign for the remote station, likely this is set with mine M0OLI so change that out)
 
+WINDOWS EXE Files for versions v1.1.9 and v1.2.0 A.i are available https://drive.google.com/drive/folders/1YWG1WdnSl9yJcV1gUq-lT6Ze3UAo1xDj?usp=drive_link
+
 A desktop chat application (PyQt5 + pyserial) for person-to-person communication over ham bands using a Teensy Tracker TNC device.
 
 ## Features
