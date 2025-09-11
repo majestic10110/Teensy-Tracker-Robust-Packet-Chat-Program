@@ -1,0 +1,11 @@
+The A.I operator mode requires LM Studio be installed and a semi decent PC or Mac, you can use A.I models with less parameters for lower powered computers.
+
+1. Download LM Studio
+2. Select a LLM Model to Download (I used openai/gpt-oss-20b) 
+3. In LM Studio 'My Models' click on the ... and Copy Default Identifier
+4. Teensy Robust Packet Chat Program > Paste that into 'Model' field 
+5. LM STudio> Developer> top left of screen STATUS turn to ON to start LM STudio server
+
+You should be good to go!
+
+Note: this is a self running operator waiting on Mycall reception. If you type into the send field while AI is on then it will close the program.
