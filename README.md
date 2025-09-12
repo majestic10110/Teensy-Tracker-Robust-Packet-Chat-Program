@@ -1,6 +1,6 @@
 # Teensy Tracker Chat
 
-The excellent Teensy RPR TNC can either be built (perhaps a group buy) via files from http://robust-packet.st or Robert, DM4RW may have a few left built, however I have been informed that the main seller now is Oliver Harms DL4KA at www.DIY599.net under the name Link500 . The Hardware was developed by Robert DM4RW and the Firmware for the device is from Pactor SCS staff inventor of robust packet Hans-Peter, DL6MAA. This chat software is to utilize the messaging capacity and ability of the device and mode. Teensy Tracker Chat was developed with ideas from Oliver M0OLI with the help of his A.I friend! 
+The excellent Teensy RPR TNC can either be built (perhaps a group buy) via files from http://robust-packet.st or Robert, DM4RW may have a few left built, however I have been informed that the main seller now is Oliver Harms DL4KA at www.DIY599.net under the name Link500 . The Hardware was developed by Robert DM4RW and the Firmware for the device is from Pactor SCS staff inventor of robust packet Hans-Peter, DL6MAA. This chat software is to utilize the messaging capacity and ability of the device and mode. Teensy Tracker Chat was developed with ideas from Oliver Cohen M0OLI with the help of his A.I friend! 
 
 **** WARNING **** DISCONNECT DATA CABLE TO RADIO WHEN CHANGING KISS CONDITION AS IT WILL PTT. There is no issue after KISS condition is off, chat is available.
 
