@@ -4,7 +4,7 @@ The excellent Teensy RPR TNC can either be built (perhaps a group buy) via files
 
 **** WARNING **** DISCONNECT DATA CABLE TO RADIO WHEN CHANGING KISS CONDITION AS IT WILL PTT. There is no issue after KISS condition is off, chat is available.
 
-*** If you are able to test, v1.2.6 is BETA the lastets alpha is LiNK500_Teensy_RPR_Chat_v1.3.6 Beta, REQUIRES FOLLOWING Fleetlist.json and VT323-regular.ttf file in same folder ,its appreciated, Thank you M0OLI
+*** If you are able to test, v1.2.6 is BETA the lastets alpha is LiNK500_Teensy_RPR_Chat_v1.3.8 Beta, REQUIRES FOLLOWING Fleetlist.json and VT323-regular.ttf file in same folder ,its appreciated, Thank you M0OLI
 ** IMPORTANT: If using the EXPERIMENTAL AND SOMEWHAT BUGGY Artificial Intelligence version starting 1.2.0 (Edit with notepad and ctrl+F enter System to search for the system field and edit with your callsign as the responsible callsign for the remote station, likely this is set with mine M0OLI so change that out)
 
 WINDOWS .EXE Files https://drive.google.com/drive/folders/1YWG1WdnSl9yJcV1gUq-lT6Ze3UAo1xDj?usp=drive_link
