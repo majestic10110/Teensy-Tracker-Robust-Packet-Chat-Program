@@ -1,0 +1,22 @@
+You will require to place the following files in the same folder as the .exe file:
+
+Fleetlink.json
+
+VT323-Regular.ttf
+
+
+Fleet manager
+
+Essentially think of this as a filter, you add the callsigns you want to interact with and if you Allow Fleet, you filter all but those callsigns. 
+
+Create your Group with ADD GROUP first then add callsigns.
+
+To Whitelist a call you need to Add TWO callsigns entries , example call G4ABC:
+
+Add callsign
+
+G4ABC (this covers the standard callsign)
+
+Add callsign 
+
+G4ABC-* (putting an asterix/Star covers all calls from SSID 1 to 99 to be allowed i.e G4ABC-1 to G4ABC-99)
