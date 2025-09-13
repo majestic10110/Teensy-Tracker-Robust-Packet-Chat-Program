@@ -7,7 +7,7 @@ The excellent Teensy RPR TNC can either be built (perhaps a group buy) via files
 *** If you are able to test LiNK500_Teensy_RPR_Chat_v1.3.6 Beta, REQUIRES FOLLOWING Fleetlist.json and VT323-regular.ttf file in same folder ,its appreciated, Thank you M0OLI
 ** IMPORTANT: If using the EXPERIMENTAL AND SOMEWHAT BUGGY Artificial Intelligence version starting 1.2.0 (Edit with notepad and ctrl+F enter System to search for the system field and edit with your callsign as the responsible callsign for the remote station, likely this is set with mine M0OLI so change that out)
 
-WINDOWS EXE Files for versions v1.2.6 and v1.2.0 A.I are available https://drive.google.com/drive/folders/1YWG1WdnSl9yJcV1gUq-lT6Ze3UAo1xDj?usp=drive_link
+WINDOWS .EXE Files https://drive.google.com/drive/folders/1YWG1WdnSl9yJcV1gUq-lT6Ze3UAo1xDj?usp=drive_link
 
 A desktop chat application (PyQt5 + pyserial) for person-to-person communication over ham bands using a Teensy Tracker TNC device.
 
