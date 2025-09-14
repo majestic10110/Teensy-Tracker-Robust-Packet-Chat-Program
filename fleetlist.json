@@ -10,7 +10,12 @@
         "default_action": "show",
         "autopermit": false
       },
-      "members": []
+      "members": [
+        "DL4KA",
+        "DL4KA-*",
+        "OH8STN",
+        "OH8STN-*"
+      ]
     }
   ]
 }
