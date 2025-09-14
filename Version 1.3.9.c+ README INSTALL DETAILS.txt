@@ -1,0 +1,23 @@
+Robust Chat 1.3.9.c 
+
+Important: to utilize fleet manager and persistent messages (retained message memory on reboot for emcom logs) you require the following in same folder as the Robust Chat program:
+
+Fleetlist.json (generated automatically by program on first boot)
+Extract 'Store_with Messages file' , this will give a folder called 'Store' in the same folder as your Robust Chat program. In the store folder is the Messages.json 
+
+
+
+Has Fleet management i.e white list ability
+
+You will be required to enter a base callsign without SSID and add another with a hyphen asterix to cover 1-99 SSID for example G4ABC:
+
+Add G4ABC
+Add G4ABC-*
+
+
+Thanks go to Julian OH8STN and Oliver DL4KA for their input and suggestions and testing patience. 
+
+Enjoy, 73
+
+Oliver Cohen M0OLI
+
