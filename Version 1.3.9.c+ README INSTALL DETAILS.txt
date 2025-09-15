@@ -5,6 +5,8 @@ Important: to utilize fleet manager and persistent messages (retained message me
 Fleetlist.json (generated automatically by program on first boot)
 Extract 'Store_with Messages file' , this will give a folder called 'Store' in the same folder as your Robust Chat program. In the store folder is the Messages.json 
 
+After 1.3.9.c this should auto install the folders in same folder , if not after first boot, then add manual
+
 
 
 Has Fleet management i.e white list ability
