@@ -30,7 +30,7 @@ def _rc_wipe_json_store():
         payload = {
             "version": 1,
             "messages": [],
-            "created": datetime.datetime.utcnow().isoformat() + "Z",
+            "created": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00","Z"),
             "note": "Cleared by user via Clear Message Window."
         }
         with open(jsonp, "w", encoding="utf-8") as f:
@@ -348,7 +348,7 @@ def base_callsign(cs: str) -> str:
     return m.group(1) if m else cs
 
 """
-LiNK500 Teensy Chat v1.4.1 Consolidated (Explicit Fleet Mode) (2025-09-12)
+LiNK500 Teensy Chat v1.4.0 Consolidated (Explicit Fleet Mode) (2025-09-12)
 - Inline Fleet Manager UI between Serial and Frequencies
 - Global dark theme with VT323 and a minimum font size of 14pt (larger elements kept larger)
 - Fleet dialogs (Add Group / Add Callsign) enlarged (VT323 14pt, wider inputs)
@@ -1583,7 +1583,7 @@ class ChatApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Robust Chat v1.4.1")
+        self.setWindowTitle("Robust Chat v1.4.0")
         self.resize(1340, 980)
 
         self.ser: Serial = None
@@ -3029,7 +3029,7 @@ def install_excepthook():
     sys.excepthook = handler
 
 def main():
-    print("Link500 Teensy Robust Chat v1.4.1 (2025-09-14)")
+    print("Link500 Teensy Robust Chat v1.4.0 (2025-09-15)")
     app = QApplication(sys.argv)
     load_vt323_font()
     try:
@@ -3135,7 +3135,7 @@ def main():
             self.status_label.setText(f"{add} already in whitelist.")
 
 # =====================
-# Robust Chat v1.4.1 — Autosave + Fleet Manager width cap (pre‑main)
+# Robust Chat v1.4.0 — Autosave + Fleet Manager width cap (pre‑main)
 # - Auto‑saves messages every 5 minutes to <base>\store\messages_v1.json
 # - File → Save Message Log (Ctrl+M) to force a save on demand
 # - Preserves dict {"version":1,"messages":[...]} or list [...] schemas
@@ -3200,7 +3200,7 @@ else:
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(payload, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            print(f"[v1.4.1 write] {e!r}")
+            print(f"[v1.4.0 write] {e!r}")
 
     
     def __rc_load_saved(self):
@@ -3290,7 +3290,7 @@ else:
             except Exception:
                 pass
         except Exception as e:
-            print(f"[v1.4.1 clear disk] {e!r}")
+            print(f"[v1.4.0 clear disk] {e!r}")
 
 def __rc_force_save(self):
         path = getattr(self, "_msg_store_path", None) or __rc_store_path()
@@ -3343,7 +3343,7 @@ if "ChatApp" in globals() and hasattr(ChatApp, "__init__"):
             act_save.triggered.connect(lambda: __rc_force_save(self))
             mfile.addAction(act_save)
         except Exception as e:
-            print(f"[v1.4.1 menu] {e!r}")
+            print(f"[v1.4.0 menu] {e!r}")
 
         # 3) Autosave every 5 minutes
         try:
@@ -3352,7 +3352,7 @@ if "ChatApp" in globals() and hasattr(ChatApp, "__init__"):
             self._rc_timer.timeout.connect(lambda: __rc_force_save(self))
             self._rc_timer.start()
         except Exception as e:
-            print(f"[v1.4.1 autosave] {e!r}")
+            print(f"[v1.4.0 autosave] {e!r}")
 
         
         # 4) Fleet Manager width reduction → 75% of original (post‑layout)
@@ -3385,7 +3385,7 @@ if "ChatApp" in globals() and hasattr(ChatApp, "__init__"):
                             new_max = max(1, int(hint * 0.85))
                             w.setMaximumWidth(new_max)
                 except Exception as e:
-                    print(f"[v1.4.1 fleet shrink] {e!r}")
+                    print(f"[v1.4.0 fleet shrink] {e!r}")
             # Run after layouts stabilize
             _t = QTimer(self)
             _t.setSingleShot(True)
@@ -3407,11 +3407,11 @@ if "ChatApp" in globals() and hasattr(ChatApp, "__init__"):
                     except Exception:
                         pass
             except Exception as e:
-                print(f"[v1.4.1 serial cap] {e!r}")
+                print(f"[v1.4.0 serial cap] {e!r}")
             _t.start()
             self._fleet_shrink_timer = _t
         except Exception as e:
-            print(f"[v1.4.1 fleet shrink init] {e!r}")
+            print(f"[v1.4.0 fleet shrink init] {e!r}")
     
         # 4) Shrink Fleet Manager + Serial group boxes to contents
         try:
@@ -3430,7 +3430,7 @@ if "ChatApp" in globals() and hasattr(ChatApp, "__init__"):
                             new_max = max(1, int(hint + 20))
                             gb.setMaximumWidth(new_max)
                 except Exception as e:
-                    print(f"[v1.4.1 shrink boxes] {e!r}")
+                    print(f"[v1.4.0 shrink boxes] {e!r}")
             _t2 = QTimer(self)
             _t2.setSingleShot(True)
             _t2.setInterval(800)
@@ -3438,7 +3438,7 @@ if "ChatApp" in globals() and hasattr(ChatApp, "__init__"):
             _t2.start()
             self._shrink_timer = _t2
         except Exception as e:
-            print(f"[v1.4.1 shrink init] {e!r}")
+            print(f"[v1.4.0 shrink init] {e!r}")
     
         # 5) UI polish: rename "Enable Fleet" -> "Enable" and shrink Fleet/Serial group boxes to contents
         try:
@@ -3508,7 +3508,7 @@ if "ChatApp" in globals() and hasattr(ChatApp, "__init__"):
                         except Exception:
                             pass
                 except Exception as e:
-                    print(f"[v1.4.1 compact groups] {e!r}")
+                    print(f"[v1.4.0 compact groups] {e!r}")
 
             # Run after layouts settle
             _ui_timer = QTimer(self)
@@ -3519,7 +3519,7 @@ if "ChatApp" in globals() and hasattr(ChatApp, "__init__"):
             _ui_timer.start()
             self._ui_compact_timer = _ui_timer
         except Exception as e:
-            print(f"[v1.4.1 ui compact init] {e!r}")
+            print(f"[v1.4.0 ui compact init] {e!r}")
         ChatApp.__init__ = __rc_patched_init
     if hasattr(ChatApp, "_clear_receive_window"):
         __rc_orig_clear = ChatApp._clear_receive_window
@@ -3528,7 +3528,7 @@ if "ChatApp" in globals() and hasattr(ChatApp, "__init__"):
             try:
                 __rc_clear_disk_messages(self)  # clears the JSON file
             except Exception as e:
-                print(f"[v1.4.1 clear hook] {e!r}")
+                print(f"[v1.4.0 clear hook] {e!r}")
         ChatApp._clear_receive_window = __rc_patched_clear
 
 
@@ -4192,7 +4192,7 @@ def _get_ack_pause_value(self):
 
 
 # =====================
-# Data Files Self‑Check (v1.4.1)
+# Data Files Self‑Check (v1.4.0)
 # - Verifies the presence of "fleetlist.json" and "store/messages_v1.json"
 # - Prompts to auto-create if missing
 # - Adds "File → Check Data Files" menu item
@@ -4324,7 +4324,7 @@ except Exception as _e_selfcheck:
 
 
 # =====================
-# Persistence CORE v1.4.1 (canonical & idempotent)
+# Persistence CORE v1.4.0 (canonical & idempotent)
 # This overrides any earlier persistence monkey patches to ensure a single, reliable flow.
 # =====================
 try:
@@ -4534,7 +4534,7 @@ except Exception as _rc_e:
 
 
 # =====================
-# Persistence Diagnostics v1.4.1-dbg
+# Persistence Diagnostics v1.4.0-dbg
 #  - Logs every write/append with record counts to store/persist_debug.log
 #  - Adds File → Force Save Now  (Ctrl+S) to flush immediately
 #  - Shows a popup if a write fails (so silent failures are visible)
@@ -4663,7 +4663,7 @@ except Exception as _rc_dbg_e:
 
 
 # =====================
-# Schema Compatibility v1.4.1
+# Schema Compatibility v1.4.0
 # - Support both list[...] and dict{"messages":[...]} file formats
 # - Preserve whichever format is detected (no silent format flip)
 # =====================
@@ -4725,7 +4725,7 @@ try:
             except Exception:
                 pass
 
-    # Monkey-patch the core functions if present from v1.4.1
+    # Monkey-patch the core functions if present from v1.4.0
     if "__rc_append" in globals():
         _orig_append = __rc_append
         def __rc_append(self, item):
@@ -4957,7 +4957,7 @@ else:
 
 
 # =====================
-# LAST-WINS STARTUP HOOK (v1.4.1 fixfinal)
+# LAST-WINS STARTUP HOOK (v1.4.0 fixfinal)
 # Ensures File menu, load-on-start, and autosave are active.
 # Also writes to store/persist_debug.log for visibility.
 # =====================
@@ -5138,7 +5138,7 @@ else:
 
 
 # =====================
-# TOP TOOLBAR ENFORCER (v1.4.1 toolbar)
+# TOP TOOLBAR ENFORCER (v1.4.0 toolbar)
 # - Adds a persistent top QToolBar with: [File ▼] [Save Log]
 # - File button opens the same File menu as the menubar (InstantPopup)
 # - Save Log triggers the same manual save routine
@@ -5239,7 +5239,7 @@ else:
 
 
 # =====================
-# UNIVERSAL MENU + TOOLBAR ENFORCER (v1.4.1 toolbar2)
+# UNIVERSAL MENU + TOOLBAR ENFORCER (v1.4.0 toolbar2)
 # Works for both QMainWindow and QWidget-based windows.
 # - Ensures a visible File menu
 # - Adds a Save Log action (Ctrl+M)
@@ -5416,7 +5416,7 @@ else:
 
 
 # =====================
-# AUTOSAVE POLICY: single 5‑min timer, NO initial 10‑second save (v1.4.1 nokick)
+# AUTOSAVE POLICY: single 5‑min timer, NO initial 10‑second save (v1.4.0 nokick)
 # =====================
 try:
     from PyQt5.QtCore import QTimer
@@ -5468,7 +5468,7 @@ else:
 
             try:
                 self._autosave5_timer = QTimer(self)
-                self._autosave5_timer.setInterval(60000)  # 5 minutes
+                self._autosave5_timer.setInterval(300000)  # 5 minutes
                 self._autosave5_timer.timeout.connect(autosave_callback)
                 self._autosave5_timer.start()
                 print("[Autosave] Timer started")
@@ -5491,7 +5491,7 @@ else:
 
 
 # =====================
-# MINIMAL CLEAN PATCH (v1.4.1 minimal_clean)
+# MINIMAL CLEAN PATCH (v1.4.0 minimal_clean)
 # - Remove/hide prior toolbars/save buttons
 # - Single 5-minute autosave
 # - Clear Message Window: SAVE first, then CLEAR UI, keep JSON
@@ -5790,7 +5790,7 @@ def __mc_force_save(self):
 
                 from PyQt5.QtCore import QTimer as __QtTimerClass
                 self._autosave5_timer = __QtTimerClass(self)
-                self._autosave5_timer.setInterval(60000)  # 1 minute (test)
+                self._autosave5_timer.setInterval(300000)  # 5 minutes
 
                 def autosave_callback():
                     try:
@@ -5872,7 +5872,7 @@ ChatApp.__init__ = __mc_init
 
 
 # =====================
-# v1.4.1 autosave post-init fix (safe override)
+# v1.4.0 autosave post-init fix (safe override)
 # =====================
 try:
     from PyQt5.QtCore import QTimer
@@ -5898,7 +5898,7 @@ if QTimer and "ChatApp" in globals() and hasattr(ChatApp, "__init__"):
         # Create a robust 1-minute autosave with diagnostics
         try:
             self._autosave_diag_timer = QTimer(self)
-            self._autosave_diag_timer.setInterval(60000)  # 1 minute
+            self._autosave_diag_timer.setInterval(300000)  # 5 minutes
             def autosave_callback():
                 try:
                     print("[Autosave] Timer triggered")
