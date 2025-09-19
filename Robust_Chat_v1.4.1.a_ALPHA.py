@@ -2073,7 +2073,7 @@ class ChatApp(QMainWindow):
         freq_layout.setSpacing(4)
         freq_layout.setContentsMargins(12, 12, 12, 12)
 
-        for freq in ["7.0903 MHz", "10.1423 MHz", "14.109 MHz"]:
+        for freq in ["7.090,3 MHz", "10.148,3 MHz", "14.109 MHz"]:
             lbl = QLabel(freq)
             lbl.setFont(QtGui.QFont('VT323', 14))
             freq_layout.addWidget(lbl)
