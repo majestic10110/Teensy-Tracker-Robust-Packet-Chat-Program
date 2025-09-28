@@ -2755,6 +2755,12 @@ class ChatApp(QMainWindow):
                 diag_log(f"[ERROR] starting AckState: {type(e).__name__}: {e}")
             except Exception:
                 pass
+        # Clear the message input after sending
+        try:
+            self.send_edit.clear()
+        except Exception:
+            pass
+
 
     def add_received_message(self, line: str):
         item = QListWidgetItem(line)
