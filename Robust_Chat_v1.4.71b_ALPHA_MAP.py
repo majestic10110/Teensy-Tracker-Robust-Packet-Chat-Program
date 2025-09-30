@@ -4,7 +4,7 @@
 
 # --- Diagnostic logging injected ---
 import os as _os, sys as _sys, traceback as _tb, datetime as _dt
-VERSION = "1.4.71"
+VERSION = "1.4.71.C"
 def _ensure_store_dir():
     try: _os.makedirs('store', exist_ok=True)
     except Exception: pass
@@ -28,7 +28,8 @@ def _install_excepthook():
 _install_excepthook()
 # --- End diagnostic logging ---
 
-import sys, os, json, re, math, datetime
+import sys
+import io, os, json, re, math, datetime
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QComboBox, QTextEdit, QGroupBox,
@@ -823,6 +824,57 @@ class AckState:
 
 import os as _h_os, subprocess as _h_subp, threading as _h_th, time as _h_time, socket as _h_sock, sys as _h_sys, webbrowser as _h_web
 from http.server import SimpleHTTPRequestHandler as _H_SimpleHandler
+
+class RangeRequestHandler(_H_SimpleHandler):
+    """
+    Simple HTTP handler with HTTP Range support for serving .pmtiles (byte-range requests).
+    """
+    def send_head(self):
+        # Mostly adapted from SimpleHTTPRequestHandler, with Range handling
+        path = self.translate_path(self.path)
+        f = None
+        if os.path.isdir(path):
+            return super().send_head()
+        ctype = self.guess_type(path)
+        try:
+            f = open(path, 'rb')
+        except OSError:
+            self.send_error(404, "File not found")
+            return None
+
+        fs = os.fstat(f.fileno())
+        size = fs.st_size
+
+        rng = self.headers.get("Range")
+        if rng:
+            m = re.match(r"bytes=(\d+)-(\d*)", rng)
+            if m:
+                start = int(m.group(1))
+                end = int(m.group(2)) if m.group(2) else size - 1
+                if start >= size:
+                    self.send_error(416, "Requested Range Not Satisfiable")
+                    f.close()
+                    return None
+                end = min(end, size - 1)
+                length = end - start + 1
+                self.send_response(206, "Partial Content")
+                self.send_header("Content-type", ctype)
+                self.send_header("Accept-Ranges", "bytes")
+                self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
+                self.send_header("Content-Length", str(length))
+                self.end_headers()
+                f.seek(start)
+                data = f.read(length)
+                f.close()
+                return io.BytesIO(data)
+
+        # No Range header: send full file
+        self.send_response(200)
+        self.send_header("Content-type", ctype)
+        self.send_header("Content-Length", str(size))
+        self.end_headers()
+        return f
+
 from socketserver import TCPServer as _H_TCPServer
 
 from PyQt5.QtCore import QUrl as _H_QUrl, Qt as _H_Qt
@@ -888,7 +940,7 @@ class _H_HTTP(_h_th.Thread):
         self.httpd = None
     def run(self):
         _H_TCPServer.allow_reuse_address = True
-        handler = lambda *a, **k: _H_SimpleHandler(*a, directory=self.directory, **k)
+        handler = lambda *a, **k: RangeRequestHandler(*a, directory=self.directory, **k)
         self.httpd = _H_TCPServer(("127.0.0.1", self.port), handler)
         self.httpd.serve_forever()
     def stop(self):
@@ -1490,7 +1542,7 @@ class ChatApp(QMainWindow):
 
             # Build GeoJSON FeatureCollection
             features = []
-            now_iso = datetime.datetime.now(getattr(datetime, "UTC", datetime.timezone.utc)).replace(microsecond=0).isoformat().replace("+00:00","Z")
+            now_iso = datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
             for cs, e in pos.items():
                 try:
                     lat = float(e.get("lat"))
