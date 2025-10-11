@@ -1,12 +1,14 @@
 # Teensy Tracker Chat
 
-Newest version 1.4.71_G4d Offline mapping, in Alpha. 
+Newest version 1.5.M_A_P ALPHA
+
+IMPORTANT: Read instruction manual, now requires TNC_PREFLIGHT_HELPER.exe or py , to be run to cancel some echo and one callsign monitor function on the TNC device, for Chat to work properly.
 
 The excellent LiNK500 and Teensy RPR TNC can either be built (perhaps a group buy) via files from http://robust-packet.st or Robert, DM4RW may have a few left built, however I have been informed that the main seller now is Oliver Harms DL4KA at www.DIY599.net under the name Link500 . The Hardware was developed by Robert DM4RW and the Firmware for the device is from Pactor SCS staff inventor of robust packet Hans-Peter, DL6MAA. This chat software is to utilize the messaging capacity and ability of the device and mode. Robust Chat was developed with ideas from Oliver Cohen M0OLI with the help of his A.I friend! 
 
 **** WARNING **** DISCONNECT DATA CABLE TO RADIO WHEN CHANGING KISS CONDITION AS IT WILL PTT. There is no issue after KISS condition is off, chat is available.
 
-*** If you are able to test, Robust_Chat v1.4.1.B BETA (or 1.4.68_alpha), REQUIRES FOLLOWING VT323-regular.ttf and Store_with_messages.ZIP extracted in same folder ,its appreciated, Thank you M0OLI
+*** If you are able to test, Robust_Chat v1.4.1.B BETA (or 1.5.M_A_P_alpha), REQUIRES FOLLOWING VT323-regular.ttf and Store_with_messages.ZIP extracted in same folder ,its appreciated, Thank you M0OLI
 ** IMPORTANT: If using the EXPERIMENTAL AND SOMEWHAT BUGGY Artificial Intelligence version starting 1.2.0 (Edit with notepad and ctrl+F enter System to search for the system field and edit with your callsign as the responsible callsign for the remote station, likely this is set with mine M0OLI so change that out)
 
 WINDOWS .EXE Files https://drive.google.com/drive/folders/1YWG1WdnSl9yJcV1gUq-lT6Ze3UAo1xDj?usp=drive_link
