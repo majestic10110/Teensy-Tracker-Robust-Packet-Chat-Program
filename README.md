@@ -1,6 +1,6 @@
 # ROBUST CHAT 
 
-Newest version 1.5.M_A_P ALPHA
+Newest version 1.5.N1
 
 IMPORTANT: Read instruction manual, now requires TNC_PREFLIGHT_HELPER.exe or py , to be run to cancel some echo and one callsign monitor function on the TNC device, for Chat to work properly.
 
