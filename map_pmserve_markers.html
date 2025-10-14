@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Offline Map</title>
+<link rel="stylesheet" href="assets/maplibre-gl.css"/>
+<style>
+html,body,#map{height:100%;width:100%;margin:0;background:#000}
+:root{--green:#00FF88;--cyan:#66FFCC}
+#hud{position:absolute;top:8px;left:8px;z-index:10;color:#39FF9B;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,136,.25);padding:6px 10px;border-radius:6px;font:14px monospace}
+#hud .lab{opacity:.85}
+#hud .val{font-weight:bold}
+.cs{position:relative;color:var(--green);font-family:monospace;font-size:12px;padding-left:12px;user-select:none;text-shadow:0 0 6px rgba(0,255,136,.6);transform:translateY(-8px)}
+.cs .dot{position:absolute;left:0;top:4px;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(0,255,136,.9),0 0 2px rgba(0,255,136,.8) inset}
+.btn{font:12px monospace;background:#021;color:#9ff;border:1px solid #0f6;padding:6px 10px;border-radius:6px;cursor:pointer;position:absolute;top:8px;right:8px;z-index:11}
+</style>
+<style>
+/* Marker label override */
+.cs { color: cyan !important; font-size: 18px !important; }
+.cs .dot { background: cyan !important; box-shadow: 0 0 8px cyan, 0 0 2px rgba(0,255,255,.8) inset !important; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="hud">
+  <span class="lab">Markers:</span> <span id="count" class="val">0</span>
+  &nbsp;·&nbsp;
+  <span class="lab">Updated:</span> <span id="ts" class="val">--:--:--Z</span>
+</div>
+<button id="fit" class="btn">Fit to Active</button>
+
+<script src="assets/maplibre-gl.js"></script>
+<script src="assets/pmtiles.js"></script>
+
+<script>
+(async function(){
+  const protocol = new pmtiles.Protocol();
+  maplibregl.addProtocol("pmtiles", protocol.tile);
+  window.addEventListener("unload", ()=> protocol.remove());
+
+  const styleInline = {
+    "version": 8,
+    "name": "Offline Map (pmtiles protocol)",
+    "sources": { "pm": { "type": "vector", "url": "pmtiles://planet_z6.pmtiles", "minzoom": 0, "maxzoom": 6 } },
+    "layers": [
+      { "id": "bg", "type": "background", "paint": { "background-color": "#000" } },
+      { "id": "earth_outline", "type": "fill", "source": "pm", "source-layer": "earth",
+        "paint": { "fill-color": "#000", "fill-outline-color": "#00FF88", "fill-opacity": 1.0 } },
+      { "id": "boundaries_line", "type": "line", "source": "pm", "source-layer": "boundaries",
+        "paint": { "line-color": "#00FF88", "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.4, 6, 1.2], "line-opacity": 0.85 } },
+      { "id": "roads_line", "type": "line", "source": "pm", "source-layer": "roads", "minzoom": 3,
+        "paint": { "line-color": "#66FFCC", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.25, 6, 0.9], "line-opacity": 0.7 } }
+    ]
+  };
+
+  let map = new maplibregl.Map({
+    container:'map',
+    style: styleInline,
+    center:[0,20],
+    zoom:1.6,
+    minZoom:0,
+    maxZoom:6,
+    attributionControl:false
+  });
+
+  const markers=new Map();
+
+  // Base lat correction (~7.7 km south) from your earlier test
+  const baseLatOffsetDeg = -0.069;
+
+  // Additional user-requested offsets: 2 km south and 2 km west (left)
+  const extraSouthKm = 2.0;
+  const extraWestKm  = 2.0;
+
+  const kmToDegLat = (km)=> km / 111.32;
+  const kmToDegLon = (km, lat)=> km / (111.32 * Math.cos(lat * Math.PI / 180));
+
+  function upsert(f){
+    const cs=f.properties?.callsign||'UNKNOWN';
+    const coords=f.geometry?.coordinates||[];
+    if(coords.length<2) return;
+    const lon = +coords[0];
+    const lat = +coords[1];
+    if(Number.isNaN(lon)||Number.isNaN(lat)) return;
+
+    let rec=markers.get(cs);
+    const el=document.createElement('div');
+    const div=document.createElement('div');
+    div.className='cs';
+    div.innerHTML='<span class="dot"></span>'+cs;
+    el.appendChild(div);
+
+    // Compute dynamic extra lon offset in degrees using the point's latitude
+    const latDegSouth = kmToDegLat(extraSouthKm);      // negative for south
+    const lonDegWest  = kmToDegLon(extraWestKm, lat);  // negative for west (we'll subtract)
+
+    const correctedLat = lat + baseLatOffsetDeg - latDegSouth;
+    const correctedLon = lon - lonDegWest;
+
+    if(!rec){
+      const m=new maplibregl.Marker({element:el,anchor:'left'}).setLngLat([correctedLon, correctedLat]).addTo(map);
+      markers.set(cs,{marker:m,data:f});
+    } else {
+      rec.marker.setLngLat([correctedLon, correctedLat]);
+      rec.data=f;
+    }
+  }
+
+  function fmtTimeUTC(d){
+    const pad=n=>String(n).padStart(2,'0');
+    return pad(d.getUTCHours())+':'+pad(d.getUTCMinutes())+':'+pad(d.getUTCSeconds())+'Z';
+  }
+
+  async function tick(){
+    try{
+      const r=await fetch('positions.geojson?ts='+Date.now(),{cache:'no-store'});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const gj=await r.json();
+      const feats=Array.isArray(gj.features)?gj.features:[];
+      for(const f of feats) upsert(f);
+      // remove stale markers that disappeared
+      const seen=new Set(feats.map(f=>f.properties?.callsign||'UNKNOWN'));
+      for(const [cs,rec] of markers){ if(!seen.has(cs)){ rec.marker.remove(); markers.delete(cs); } }
+      document.getElementById('count').textContent = markers.size;
+      document.getElementById('ts').textContent = fmtTimeUTC(new Date());
+    }catch(e){
+      document.getElementById('ts').textContent='ERR';
+      console.error(e);
+    }
+  }
+  tick(); setInterval(tick,3000);
+
+  // Fit to Active handler
+  document.getElementById('fit').onclick = ()=>{
+    const keys = Array.from(markers.keys());
+    if(keys.length === 0){
+      map.fitBounds([[-179.9,-85],[179.9,85]], { padding: 30, linear: true });
+      return;
+    }
+    const b = new maplibregl.LngLatBounds();
+    for(const k of keys){
+      const ll = markers.get(k).marker.getLngLat();
+      b.extend([ll.lng, ll.lat]);
+    }
+    map.fitBounds(b, { padding: 40, animate: true });
+  };
+})();
+</script>
+</body>
+</html>

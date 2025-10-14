@@ -1,0 +1,124 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Offline Map</title>
+<link rel="stylesheet" href="assets/maplibre-gl.css"/>
+<style>
+html,body,#map{height:100%;width:100%;margin:0;background:#000}
+:root{--green:#00FF88;--cyan:#66FFCC}
+#hud{position:absolute;top:8px;left:8px;z-index:10;color:#39FF9B;background:rgba(0,0,0,.4);border:1px solid rgba(0,255,136,.25);padding:6px 10px;border-radius:6px;font:14px monospace}
+#log{position:absolute;bottom:8px;left:8px;right:8px;max-height:45%;overflow:auto;font:12px monospace;color:#9f9;background:rgba(0,0,0,.5);border:1px solid rgba(0,255,136,.25);padding:6px}
+.cs{position:relative;color:var(--green);font-family:monospace;font-size:12px;padding-left:12px;user-select:none;text-shadow:0 0 6px rgba(0,255,136,.6);transform:translateY(-8px)}
+.cs .dot{position:absolute;left:0;top:4px;width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(0,255,136,.9),0 0 2px rgba(0,255,136,.8) inset}
+.btn{font:12px monospace;background:#021;color:#9ff;border:1px solid #0f6;padding:6px 10px;border-radius:6px;cursor:pointer;position:absolute;top:8px;right:8px;z-index:11}
+</style>
+<style>
+/* Marker label override */
+.cs {
+  color: cyan !important;
+  font-size: 18px !important;
+}
+/* Optional: dot color tweak to match cyan theme */
+.cs .dot {
+  background: cyan !important;
+  box-shadow: 0 0 8px cyan, 0 0 2px rgba(0,255,255,.8) inset !important;
+}
+</style>
+
+</head><body>
+<div id="map"></div>
+<div id="hud">Markers: <span id="count">0</span> · Updated: <span id="ts">--:--:--</span></div>
+<pre id="log"></pre>
+<button id="fit" class="btn">Fit to Active</button>
+
+<script>
+function log(m){const el=document.getElementById('log'); el.textContent += m + "\\n"; el.scrollTop = el.scrollHeight;}
+window.onerror = (msg,src,line,col,err)=>log("[onerror] " + msg + " @ " + src + ":" + line + ":" + col);
+</script>
+<script src="assets/maplibre-gl.js" onload="log('maplibregl loaded')" onerror="log('FAILED to load maplibre-gl.js')"></script>
+<script>log("maplibregl typeof: " + (typeof maplibregl));</script>
+
+<script src="assets/pmtiles.js" onload="log('pmtiles.js loaded (UMD)'); window.__pmUMD=true;" onerror="log('FAILED to load pmtiles.js (UMD)')"></script>
+<script type="module">
+try{
+  if(!window.pmtiles){
+    const m = await import('./assets/pmtiles.js');
+    window.pmtiles = m;
+    window.__pmESM = true;
+  }
+}catch(e){ console.error(e); }
+</script>
+
+<script>
+(async function(){
+  function waitForPmtiles(ms=1500){
+    return new Promise(res=>{ const t0=Date.now(); (function spin(){
+      if(window.pmtiles){ res(true); return;}
+      if(Date.now()-t0>ms){ res(false); return;}
+      requestAnimationFrame(spin);
+    })(); });
+  }
+  const ok = await waitForPmtiles();
+  log("pmtiles present: " + ok + " (UMD=" + !!window.__pmUMD + ", ESM=" + !!window.__pmESM + ")");
+  if(!ok){ log("pmtiles not present -> cannot render map"); return; }
+
+  const protocol = new pmtiles.Protocol();
+  maplibregl.addProtocol("pmtiles", protocol.tile);
+  window.addEventListener("unload", ()=> protocol.remove());
+
+  const styleInline = {
+    "version": 8,
+    "name": "Offline Map (pmtiles protocol)",
+    "sources": { "pm": { "type": "vector", "url": "pmtiles://planet_z6.pmtiles", "minzoom": 0, "maxzoom": 6 } },
+    "layers": [
+      { "id": "bg", "type": "background", "paint": { "background-color": "#000" } },
+      { "id": "earth_outline", "type": "fill", "source": "pm", "source-layer": "earth",
+        "paint": { "fill-color": "#000", "fill-outline-color": "#00FF88", "fill-opacity": 1.0 } },
+      { "id": "boundaries_line", "type": "line", "source": "pm", "source-layer": "boundaries",
+        "paint": { "line-color": "#00FF88", "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.4, 6, 1.2], "line-opacity": 0.85 } },
+      { "id": "roads_line", "type": "line", "source": "pm", "source-layer": "roads", "minzoom": 3,
+        "paint": { "line-color": "#66FFCC", "line-width": ["interpolate", ["linear"], ["zoom"], 3, 0.25, 6, 0.9], "line-opacity": 0.7 } }
+    ]
+  };
+
+  let map;
+  try{
+    map = new maplibregl.Map({container:'map', style: styleInline, center:[0,20], zoom:1.6, minZoom:0, maxZoom:6, attributionControl:false});
+    map.on('error', e=> log("[map error] " + (e && e.error ? (e.error.message || e.error.toString()) : JSON.stringify(e))));
+    map.on('load', ()=> log("map 'load' fired"));
+  }catch(e){ log("Failed to create map: " + e); return; }
+
+  const markers=new Map();
+  function fmtTime(d){const p=n=>String(n).padStart(2,'0');return p(d.getUTCHours())+':'+p(d.getUTCMinutes())+':'+p(d.getUTCSeconds())+'Z';}
+  function ageMinutes(iso){if(!iso)return 9999;const t=Date.parse(iso);return isNaN(t)?9999:(Date.now()-t)/60000;}
+  function cls(mins){if(mins<=5)return'';if(mins<=20)return'dim';return'stale';}
+  function upsert(f){
+    const cs=f.properties?.callsign||'UNKNOWN';const [lon,lat]=f.geometry?.coordinates||[];const mins=ageMinutes(f.properties?.last_heard);
+    if(lat==null||lon==null)return; if(mins>70){const r=markers.get(cs);if(r){r.marker.remove();markers.delete(cs);}return;}
+    let rec=markers.get(cs); const el=document.createElement('div'); const div=document.createElement('div'); div.className='cs '+cls(mins); div.innerHTML='<span class="dot"></span>'+cs; el.appendChild(div);
+    if(!rec){ const m=new maplibregl.Marker({element:el,anchor:'left'}).setLngLat([lon,lat]).addTo(map); markers.set(cs,{marker:m,data:f});
+    } else { rec.marker.setLngLat([lon,lat]); rec.data=f; }
+    el.title=`${cs}  ${lon?.toFixed?.(4) ?? lon}, ${lat?.toFixed?.(4) ?? lat}`;
+  }
+  async function tick(){
+    try{
+      const r=await fetch('positions.geojson?ts='+Date.now(),{cache:'no-store'});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const gj=await r.json(); const feats=Array.isArray(gj.features)?gj.features:[];
+      for(const f of feats) upsert(f);
+      const seen=new Set(feats.map(f=>f.properties?.callsign||"UNKNOWN"));
+      for(const [cs,rec] of markers){ if(!seen.has(cs)){ rec.marker.remove(); markers.delete(cs); } }
+      document.getElementById('count').textContent=markers.size; document.getElementById('ts').textContent=fmtTime(new Date());
+    }catch(e){ document.getElementById('ts').textContent='ERR'; log('positions error: '+e); }
+  }
+  tick(); setInterval(tick,3000);
+
+  document.getElementById('fit').onclick = ()=>{
+    const keys=[...markers.keys()];
+    if(keys.length===0){ map.fitBounds([[-179.9,-85],[179.9,85]],{padding:30,linear:true}); return; }
+    const b = new maplibregl.LngLatBounds();
+    for(const k of keys){ const ll = markers.get(k).marker.getLngLat(); b.extend([ll.lng, ll.lat]); }
+    map.fitBounds(b, {padding: 40, animate: true});
+  };
+})();
+</script>
+</body></html>
