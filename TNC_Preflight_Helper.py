@@ -62,10 +62,13 @@ class PreflightWindow(QMainWindow):
         self._step_texts = [
             "PTT OFF (ESC X 0)",
             "Exit KISS (C0 FF C0 0D)",
+            "Set Mode RPR R300 (ESC %B R300)",
+            "Set Center 1500 Hz (ESC %L 1500)",
+            "Set TXDelay 700 ms (ESC T 70)",
+            "Set TX Tail 50 ms (ESC %N 5)",
             "Monitor ON filtered (ESC MIUSC - MYCALL)",
-            "Save (%ZS)",
             "Echo OFF (ESC E0)",
-            "Save (ESC %ZS)",
+            "Store Settings (ESC %ZS)",
             "PTT ON (ESC X 1)",
         ]
         for t in self._step_texts:
@@ -172,19 +175,24 @@ class PreflightWindow(QMainWindow):
         for t in self._step_texts:
             self.steps_list.addItem(QListWidgetItem("• " + t + " …"))
 
+        
         steps = []
         if self.ptt_guard.isChecked():
             steps.append((lambda: self._send_cmd("X 0", esc=True), 0))
 
         steps += [
             (lambda: self._kiss_exit_bytes(), 1),
-            (lambda: self._send_monitor_cmd(), 2),
-            (lambda: self._send_cmd("%ZS", esc=False), 3),
-            (lambda: self._send_cmd("E0", esc=True), 4),
-            (lambda: self._send_cmd("%ZS", esc=True), 5),
-            (lambda: self._send_cmd("X 1", esc=True), 6),
+            (lambda: self._send_cmd("%B R300", esc=True), 2),
+            (lambda: self._send_cmd("%L 1500", esc=True), 3),
+            (lambda: self._send_cmd("T 70", esc=True), 4),
+            (lambda: self._send_cmd("%N 5", esc=True), 5),
+            (lambda: self._send_monitor_cmd(), 6),
+            (lambda: self._send_cmd("E0", esc=True), 7),
+            (lambda: self._send_cmd("%ZS", esc=True), 8),
+            (lambda: self._send_cmd("X 1", esc=True), 9),
         ]
-        self._run_steps_with_timer(steps, 1000)
+        self._run_steps_with_timer(steps, 900)
+    
 
     def _cancel_preflight(self):
         self._canceled = True
