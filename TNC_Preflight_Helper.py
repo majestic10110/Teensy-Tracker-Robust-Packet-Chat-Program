@@ -5,7 +5,8 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QLabel, QPushButton, QComboBox,
     QHBoxLayout, QVBoxLayout, QGroupBox, QListWidget, QListWidgetItem,
     QMessageBox, QCheckBox, QWidget, QLineEdit
-)
+, QSpinBox)
+
 import serial
 from serial.tools import list_ports
 
@@ -43,6 +44,15 @@ class PreflightWindow(QMainWindow):
         self.call_edit.setMaxLength(9)  # basecall up to 6, optional -SSID; we'll strip SSID before use
         self.connect_btn = QPushButton("Open Port")
 
+        # TXDelay spinner (ms)
+        self.txdelay_spin = QSpinBox()
+        self.txdelay_spin.setRange(50, 2000)
+        self.txdelay_spin.setSingleStep(10)
+        self.txdelay_spin.setValue(300)
+        hl.addSpacing(12)
+        hl.addWidget(QLabel("TXDelay (ms):"))
+        hl.addWidget(self.txdelay_spin)
+    
         hl.addWidget(QLabel("Port:"))
         hl.addWidget(self.port_box, 1)
         hl.addWidget(self.refresh_btn)
@@ -62,9 +72,11 @@ class PreflightWindow(QMainWindow):
         self._step_texts = [
             "PTT OFF (ESC X 0)",
             "Exit KISS (C0 FF C0 0D)",
+            "Disable Teensy Elbug (ESC <E 0)",
+            "Disable Teensy Sidetone (ESC <T 0)",
             "Set Mode RPR R300 (ESC %B R300)",
             "Set Center 1500 Hz (ESC %L 1500)",
-            "Set TXDelay 700 ms (ESC T 70)",
+            "Set TXDelay 300 ms (ESC T 30)",
             "Set TX Tail 50 ms (ESC %N 5)",
             "Monitor ON filtered (ESC MIUSC - MYCALL)",
             "Echo OFF (ESC E0)",
@@ -176,22 +188,32 @@ class PreflightWindow(QMainWindow):
             self.steps_list.addItem(QListWidgetItem("• " + t + " …"))
 
         
+        
         steps = []
         if self.ptt_guard.isChecked():
             steps.append((lambda: self._send_cmd("X 0", esc=True), 0))
 
         steps += [
+            # Leave KISS so ESC-prefixed commands are accepted
             (lambda: self._kiss_exit_bytes(), 1),
-            (lambda: self._send_cmd("%B R300", esc=True), 2),
-            (lambda: self._send_cmd("%L 1500", esc=True), 3),
-            (lambda: self._send_cmd("T 70", esc=True), 4),
-            (lambda: self._send_cmd("%N 5", esc=True), 5),
-            (lambda: self._send_monitor_cmd(), 6),
-            (lambda: self._send_cmd("E0", esc=True), 7),
-            (lambda: self._send_cmd("%ZS", esc=True), 8),
-            (lambda: self._send_cmd("X 1", esc=True), 9),
+            # Teensy-specific: ensure no CW keyer or sidetone injects tones on TX
+            (lambda: self._send_cmd("<E 0", esc=True), 2),
+            (lambda: self._send_cmd("<T 0", esc=True), 3),
+            # Robust Packet Radio baseline
+            (lambda: self._send_cmd("%B R300", esc=True), 4),
+            (lambda: self._send_cmd("%L 1500", esc=True), 5),
+            (lambda: self._send_cmd("T %d" % max(0, int((self.txdelay_spin.value() if hasattr(self, "txdelay_spin") else 300)/10)), esc=True), 6),
+            (lambda: self._send_cmd("%N 5", esc=True), 7),
+            # Monitoring and hygiene
+            (lambda: self._send_monitor_cmd(), 8),
+            (lambda: self._send_cmd("E0", esc=True), 9),
+            # Store to EEPROM/flash
+            (lambda: self._send_cmd("%ZS", esc=True), 10),
+            # Normal operation
+            (lambda: self._send_cmd("X 1", esc=True), 11),
         ]
         self._run_steps_with_timer(steps, 900)
+    
     
 
     def _cancel_preflight(self):
