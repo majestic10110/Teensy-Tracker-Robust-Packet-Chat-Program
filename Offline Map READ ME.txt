@@ -1,0 +1,6 @@
+To start the offline map in browser:
+
+* Click or double click - Start_Map_Server_EXE_MINIMIZED.bat
+* GO TO BROWSER enter 127.0.0.1:9797/map_pmserver_markers.html
+* Bookmark the page to save it for future reference
+

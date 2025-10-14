@@ -1,0 +1,16 @@
+{
+  "enabled": false,
+  "active_fleets": [
+    "Default"
+  ],
+  "fleets": [
+    {
+      "name": "Default",
+      "rules": {
+        "default_action": "show",
+        "autopermit": false
+      },
+      "members": []
+    }
+  ]
+}
